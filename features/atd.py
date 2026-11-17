@@ -21,6 +21,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, ROOT)
 from games import DATA_DIR, GAME, GAMES, require, source_frames  # noqa: E402
 

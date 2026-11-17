@@ -1,7 +1,7 @@
-"""Regenerate our submission from the provided data -- the one command a reviewer runs.
+"""Model v14 (our submission): touch-gated Viterbi + referee whistle. The one command a reviewer runs.
 
-    .\\.venv\\Scripts\\python.exe solution\\run.py                 # -> evaluation/results/v14.csv
-    .\\.venv\\Scripts\\python.exe solution\\run.py --name team     # -> evaluation/results/team.csv
+    .\\.venv\\Scripts\\python.exe models\\v14_whistle_viterbi.py                 # -> evaluation/results/v14.csv
+    .\\.venv\\Scripts\\python.exe models\\v14_whistle_viterbi.py --name team     # -> evaluation/results/team.csv
 
 Pipeline: tracking + Smart Tagging + referee whistle (tactical sound) -> features -> dead ball ->
 possession -> CSV. The first run decodes the sound once (a few minutes) and caches it in data/cache.
@@ -16,6 +16,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 from games import GAME, GAMES, half_video_blocks, source_frames  # noqa: E402
@@ -23,7 +24,7 @@ from games import GAME, GAMES, half_video_blocks, source_frames  # noqa: E402
 import params as P  # noqa: E402
 from atd import load_arrays  # noqa: E402
 from deadball import detect, runs  # noqa: E402
-from features import compute  # noqa: E402
+from tracking import compute  # noqa: E402
 from possession import DEAD, NONE, assign  # noqa: E402
 import tags as tagging  # noqa: E402
 
@@ -123,9 +124,9 @@ def summary(labels, f, halves):
         *np.nanpercentile(act[~vis], [25, 50, 75])))
 
 
-def main():
+def main(default_name="v14"):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--name", default="v14", help="file name on the board (no .csv)")
+    parser.add_argument("--name", default=default_name, help="file name on the board (no .csv)")
     parser.add_argument("--out", default=os.path.join(ROOT, "evaluation", "results"))
     args = parser.parse_args()
 

@@ -5,8 +5,8 @@ RESULT: NOT USED. No feature located the broadcast: confident chunks 1/218 (loud
 ~3-4% (median lead 1.03-1.04). The two sound tracks do not share enough structure (the broadcast is
 a TV mix dominated by commentary). Kept as the record of the attempt; nothing feeds the pipeline.
 
-    .\\.venv\\Scripts\\python.exe solution\\broadcast_align.py            # decode both (minutes, once)
-    .\\.venv\\Scripts\\python.exe solution\\broadcast_align.py --cached   # reuse the saved envelopes
+    .\\.venv\\Scripts\\python.exe tools\\broadcast_align.py            # decode both (minutes, once)
+    .\\.venv\\Scripts\\python.exe tools\\broadcast_align.py --cached   # reuse the saved envelopes
 
 Why: the broadcast feed cuts to replays, close-ups and crowd shots, and a TV director does that
 almost only while the ball is dead (after a foul, an injury, a goal). Its homography is invalid on
@@ -36,6 +36,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "starter"))
@@ -160,7 +161,7 @@ def main():
         os.makedirs(os.path.dirname(ENV), exist_ok=True)
         np.savez_compressed(ENV, tactical=tac, broadcast=bc, b_bins=b_bins, b_level=b_level)
     if not os.path.exists(WHISTLE):
-        sys.exit("run solution/whistle.py first (it saves the tactical spectrum)")
+        sys.exit("run features/whistle.py first (it saves the tactical spectrum)")
     w = np.load(WHISTLE)
     t_bins, t_level = w["bins"], w["level"]
     k = pick_pitch(t_bins, graded)[0]
@@ -210,7 +211,7 @@ def main():
 
     sub = os.path.join(ROOT, "evaluation", "results", "v14.csv")
     if not os.path.exists(sub):
-        print("(run solution/run.py first to compare with v14)")
+        print("(run models/v14_whistle_viterbi.py first to compare with v14)")
         return 0
     lab = np.loadtxt(sub, delimiter=",", skiprows=1, dtype=str, usecols=1)
     inv_t = np.zeros(n_t, dtype=bool)

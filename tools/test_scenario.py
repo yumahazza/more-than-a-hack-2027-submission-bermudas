@@ -1,7 +1,7 @@
 """A hand-built 88-second scenario with a known answer, to test the pipeline logic WITHOUT the
 match data (which never leaves our machines). Run:
 
-    .\\.venv\\Scripts\\python.exe solution\\test_scenario.py
+    .\\.venv\\Scripts\\python.exe tools\\test_scenario.py
 
 Story (frames at 25 fps):
     0-100     kick-off setup, players still            -> D
@@ -27,11 +27,13 @@ import sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, HERE)
 import params as P  # noqa: E402
 import tags as tagging  # noqa: E402
 from deadball import detect, runs  # noqa: E402
-from features import compute  # noqa: E402
+from tracking import compute  # noqa: E402
 from possession import assign  # noqa: E402
 
 L, W = 105.3, 68.0

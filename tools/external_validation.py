@@ -1,6 +1,6 @@
 """External validation on a DIFFERENT, public match: Metrica Sports Sample Game 3.
 
-    .\\.venv\\Scripts\\python.exe solution\\external_validation.py <folder with Sample_Game_3_*>
+    .\\.venv\\Scripts\\python.exe tools\\external_validation.py <folder with Sample_Game_3_*>
 
 Data: https://github.com/metrica-sports/sample-data (data/Sample_Game_3): EPTS tracking (same
 format as the competition ATD, players x,y only), metadata XML and Metrica event JSON. RULES.md
@@ -29,6 +29,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "evaluation"))
 import params as P  # noqa: E402
@@ -36,7 +37,7 @@ import possession_metrics as pm  # noqa: E402
 import tags as tagging  # noqa: E402
 from compare import macro_score, segment_contrib, spell_flags, spell_score  # noqa: E402
 from deadball import detect  # noqa: E402
-from features import compute  # noqa: E402
+from tracking import compute  # noqa: E402
 from possession import assign  # noqa: E402
 
 HOME, AWAY, DEAD, NONE = 0, 1, 2, -1

@@ -1,7 +1,7 @@
 """Calibrate the team-change parameters on a DIFFERENT, labelled, public match (Metrica Sample
 Game 3), never on the competition match.
 
-    .\\.venv\\Scripts\\python.exe solution\\calibrate_external.py <folder with Sample_Game_3_*>
+    .\\.venv\\Scripts\\python.exe tools\\calibrate_external.py <folder with Sample_Game_3_*>
 
 RULES.md: "Hand-labelled data from other games is fine, in any amount" to train or validate. The
 competition's public 5 minutes are NOT used here; after the values are chosen they are only a
@@ -28,7 +28,7 @@ import params as P
 import tags as tagging
 from deadball import detect
 from external_validation import build_labels, load_tracking, to_codes, pm
-from features import compute
+from tracking import compute
 from possession import assign
 
 GRID = {

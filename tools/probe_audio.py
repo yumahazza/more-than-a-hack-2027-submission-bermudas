@@ -1,8 +1,8 @@
 """Does a video file carry an audio track? Reads only the MP4 container header (track list),
 never the picture or the sound itself, and needs no extra package.
 
-    .\\.venv\\Scripts\\python.exe solution\\probe_audio.py            # tactical and broadcast
-    .\\.venv\\Scripts\\python.exe solution\\probe_audio.py file.mp4
+    .\\.venv\\Scripts\\python.exe tools\\probe_audio.py            # tactical and broadcast
+    .\\.venv\\Scripts\\python.exe tools\\probe_audio.py file.mp4
 
 Step 1 of whistle detection: without a sound track there is nothing to detect.
 """
@@ -12,6 +12,8 @@ import struct
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, os.path.dirname(HERE))
 
 CONTAINERS = {b"moov", b"trak", b"mdia", b"minf", b"stbl"}

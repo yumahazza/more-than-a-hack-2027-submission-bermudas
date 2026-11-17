@@ -1,6 +1,6 @@
 # References
 
-Literature behind the solution in `solution/`, and how each source maps onto our rules. Collected on
+Literature behind the solution in `models/` and `features/`, and how each source maps onto our rules. Collected on
 2026-11-12.
 
 Reading status:

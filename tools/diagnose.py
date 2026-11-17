@@ -1,6 +1,6 @@
 """Why does ours go wrong on the public 5 minutes? Mechanisms, not scores.
 
-    .\\.venv\\Scripts\\python.exe solution\\diagnose.py
+    .\\.venv\\Scripts\\python.exe tools\\diagnose.py
 
 Uses the PUBLIC ground truth (frames 11185-18684, shipped in this repository) only to see WHICH
 part of the logic fails: dead ball starting late, ending early, a touch credited to the wrong team.
@@ -17,6 +17,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 from games import GAME, half_video_blocks, source_frames  # noqa: E402
@@ -25,7 +26,7 @@ import params as P  # noqa: E402
 import tags as tagging  # noqa: E402
 from atd import load_arrays  # noqa: E402
 from deadball import close_holes, rolling_max, runs, sustained  # noqa: E402
-from run import predict  # noqa: E402
+from v14_whistle_viterbi import predict  # noqa: E402
 
 GT_PATH = os.path.join(ROOT, "evaluation", "gt", "BAR-ATH_possession_gt_public.csv")
 CODE = {"H": 0, "A": 1, "D": 2, "X": -1}

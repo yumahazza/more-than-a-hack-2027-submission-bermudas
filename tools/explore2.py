@@ -1,6 +1,6 @@
 """Stage 1.3 (continued): two questions raised by explore.py.
 
-    .\\.venv\\Scripts\\python.exe solution\\explore2.py
+    .\\.venv\\Scripts\\python.exe tools\\explore2.py
 
 A. The ATD ball speed is never above 10 m/s. Is the column odd, or are the ball positions
    themselves smoothed / stuck to players? -> compute the speed ourselves from the positions.
@@ -17,6 +17,8 @@ import sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, HERE)
 from explore import (ATTACKING_CODES, DEFENDING_CODES, FPS, LENGTH, WIDTH,  # noqa: E402
                      graded_mask, header, load_smart_tagging, pct, percentiles, runs,

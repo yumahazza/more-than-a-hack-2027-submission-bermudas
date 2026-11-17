@@ -1,7 +1,7 @@
 """Every threshold of the solution, in one place, with the reason for its value.
 
 Rule we follow (RULES.md / EVALUATION.md): values come from football logic, from the literature
-(docs/REFERENCES.md) and from aggregate statistics of the match data (solution/explore*.py), NEVER
+(docs/REFERENCES.md) and from aggregate statistics of the match data (tools/explore*.py), NEVER
 from trying values against the public 5-minute ground truth. Change a value only with a reason you
 could write in the technical document.
 """
@@ -159,7 +159,7 @@ SWITCH_COST = 5.70         # = ln(MEAN_POSSESSION_S * FPS)
 # detected kick as certain; now a kick needs ~0.3 s of zone evidence to change the team.
 KICK_PRECISION = 0.86
 KICK_EVIDENCE = 1.82       # = ln(KICK_PRECISION / (1 - KICK_PRECISION))
-# v8: team shape while the ball is lost (solution/shape.py). Stretch index difference, smoothed
+# v8: team shape while the ball is lost (models/shape.py). Stretch index difference, smoothed
 # +/- 1 s; logistic fit on first-pass pseudo-labels from frames at least 2 s away from any change;
 # per-frame evidence divided by the feature's correlation time (capped at 10 s).
 USE_SHAPE = True
@@ -195,7 +195,7 @@ USE_OOB_GAP = True
 USE_TOUCH_GATE = True
 TOUCH_SHARE = 0.9
 
-# v10: H / A / D in one three-state HMM (solution/joint.py). The dead-ball evidence model is fitted
+# v10: H / A / D in one three-state HMM (models/joint.py). The dead-ball evidence model is fitted
 # on first-pass pseudo-labels; transition costs come from first-pass stretch lengths. The hard
 # dead-ball rules of v1-v9 (99% precise on the public window) stay as strong evidence: +1 per
 # frame, so a 1 s hard stretch already outweighs any transition cost.

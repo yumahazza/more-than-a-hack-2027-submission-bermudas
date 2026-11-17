@@ -1,7 +1,7 @@
 """Why does whistle.py find so few whistles? Aggregates only, from data/derived/*_whistle.npz
 (no re-decoding, no ground truth).
 
-    .\\.venv\\Scripts\\python.exe solution\\whistle_diag.py
+    .\\.venv\\Scripts\\python.exe tools\\whistle_diag.py
 
 1. Where in the band the spectral peak sits, for all graded frames and for the most tonal ones.
    A referee uses one whistle all match, so true whistles pile up at one pitch; a steady
@@ -16,6 +16,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 from games import GAME, half_video_blocks  # noqa: E402
@@ -23,7 +24,7 @@ from games import GAME, half_video_blocks  # noqa: E402
 import params as P  # noqa: E402
 from deadball import close_holes, runs  # noqa: E402
 
-PATH = os.path.join(ROOT, "data", "derived", "{}_whistle.npz".format(GAME))
+from whistle import OUT as PATH  # noqa: E402  (data/cache, where whistle.py saves it)
 
 
 def main():

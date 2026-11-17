@@ -1,7 +1,7 @@
 """Referee whistles from the tactical video's sound track, found automatically.
 
-    .\\.venv\\Scripts\\python.exe solution\\whistle.py            # decode + detect (a few minutes)
-    .\\.venv\\Scripts\\python.exe solution\\whistle.py --cached   # detect again from the saved spectrum
+    .\\.venv\\Scripts\\python.exe features\\whistle.py            # decode + detect (a few minutes)
+    .\\.venv\\Scripts\\python.exe features\\whistle.py --cached   # detect again from the saved spectrum
 
 Why: fouls, injuries and other stoppages that Smart Tagging does not tag are the largest error
 left in the dead ball. The referee stops play with the whistle: one steady, narrow tone that
@@ -36,6 +36,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, HERE)
 sys.path.insert(0, ROOT)
 from games import DATA_DIR, GAME, half_video_blocks, source_frames, video_path  # noqa: E402

@@ -1,6 +1,6 @@
 """Stage 1.3: summary statistics of the match data, to understand it before building a solution.
 
-    .\\.venv\\Scripts\\python.exe solution\\explore.py
+    .\\.venv\\Scripts\\python.exe tools\\explore.py
 
 Prints SUMMARY NUMBERS only (shares, percentiles, counts) over the graded frames. Nothing is
 printed per frame, so the output can be shared with the team (and with an AI assistant) without
@@ -18,6 +18,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path[:0] = [os.path.join(ROOT, d) for d in ("models", "features", "tools")]
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "starter"))
 from games import GAME, GAMES, half_video_blocks  # noqa: E402
