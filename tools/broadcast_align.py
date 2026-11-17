@@ -26,7 +26,7 @@ the mapping should be one constant shift per stretch between real cuts (e.g. hal
   3. Consecutive confident chunks with the same shift (+/- 2 frames) form a segment.
 
 Only aggregates are printed: the segments (broadcast span, shift, confidence) and how the invalid-
-homography stretches fall on our own v14 labels. No ground truth is read.
+homography stretches fall on our own v3 labels. No ground truth is read.
 """
 
 import os
@@ -209,19 +209,19 @@ def main():
     print("broadcast invalid-homography stretches: {} (>= 1 s: {}), {:.1%} of frames".format(
         len(inv_s), int(np.sum(inv_l >= P.FPS)), np.mean(~valid)))
 
-    sub = os.path.join(ROOT, "evaluation", "results", "v14.csv")
+    sub = os.path.join(ROOT, "evaluation", "results", "v3.csv")
     if not os.path.exists(sub):
-        print("(run models/v14_whistle_viterbi.py first to compare with v14)")
+        print("(run models/v3_whistle_viterbi.py first to compare with v3)")
         return 0
     lab = np.loadtxt(sub, delimiter=",", skiprows=1, dtype=str, usecols=1)
     inv_t = np.zeros(n_t, dtype=bool)
     m = mapped & ~valid
     inv_t[to_tac[m]] = True
     g = graded
-    print("\non the tactical timeline (graded frames), against our v14 labels:")
-    print("  invalid-broadcast frames: {:.1%} of graded; of these, v14 says D {:.0%}".format(
+    print("\non the tactical timeline (graded frames), against our v3 labels:")
+    print("  invalid-broadcast frames: {:.1%} of graded; of these, v3 says D {:.0%}".format(
         np.mean(inv_t[g]), np.mean(lab[inv_t & g] == "D") if np.any(inv_t & g) else 0))
-    print("  v14 D frames covered by invalid broadcast: {:.0%};  v14 live frames covered: {:.1%}".format(
+    print("  v3 D frames covered by invalid broadcast: {:.0%};  v3 live frames covered: {:.1%}".format(
         np.mean(inv_t[g & (lab == "D")]), np.mean(inv_t[g & (lab != "D")])))
     cand = 0
     cand_s = 0.0
@@ -229,7 +229,7 @@ def main():
         if l >= 5 * P.FPS and np.mean(lab[s:s + l] == "D") < 0.2:
             cand += 1
             cand_s += l / P.FPS
-    print("  invalid stretches >= 5 s that v14 calls live (candidate missed stoppages): {} ({:.0f} s)".format(
+    print("  invalid stretches >= 5 s that v3 calls live (candidate missed stoppages): {} ({:.0f} s)".format(
         cand, cand_s))
     return 0
 

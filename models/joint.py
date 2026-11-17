@@ -1,20 +1,13 @@
-"""v10: home / away / dead ball decided together in one three-state HMM.
-
-Why: up to v9 the dead ball was decided first by hard yes/no rules ("quiet for 3 s AND a set-piece
-tag", "quiet for 5 s AND few phase tags"), then the team by an HMM. diagnose.py showed the stoppages
-we miss (a foul, an injury) are many WEAK signals together: players slowing, the ball lost or
-rolling slowly, few passes, no phase-of-play tag. Each fails its threshold alone. In an HMM weak
-evidence ADDS UP, the same way possession evidence has since v4. A teammate's model, which treats
-dead ball as a Viterbi state, finds far more of the dead ball, which points the same way.
+"""Home / away / dead ball decided together in one three-state HMM (disabled, USE_JOINT = False).
 
 Without human labels:
 
-1. First pass = the v9 pipeline (hard dead-ball rules + two-state H/A Viterbi).
+1. First pass = the v1 pipeline (hard dead-ball rules + two-state H/A Viterbi).
 2. Dead-ball evidence model: a logistic regression of "dead" on simple per-frame cues, fitted on
    PSEUDO-LABELS from the first pass: frames well inside a first-pass dead stretch vs frames well
    inside live play (RULES.md allows algorithmic pseudo-labels). Its log-odds minus the prior
    log-odds is the per-frame evidence, divided by its correlation time (frames are not
-   independent), exactly as for team shape in v8.
+   independent), as for team shape in shape.py.
 3. The first-pass hard rules stay as strong evidence (they are 99% precise on the public window).
 4. Transition costs come from the first pass itself: entering dead ball costs ln(mean live
    stretch), leaving it ln(mean dead stretch) + ln 2 (two live states to go to); a team change

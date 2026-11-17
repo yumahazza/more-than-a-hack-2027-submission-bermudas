@@ -6,11 +6,11 @@ Data: https://github.com/metrica-sports/sample-data (data/Sample_Game_3): EPTS t
 format as the competition ATD, players x,y only), metadata XML and Metrica event JSON. RULES.md
 allows labelled data from other games; this match is not the competition match.
 
-Why: the public window has 17 possessions, so v9 vs v12 cannot be separated beyond noise there.
+Why: the public window has 17 possessions, so v1 vs v2 cannot be separated beyond noise there.
 This match has several hundred possessions. Labels are built from its human event data, so their
 definition differs from the competition ground truth (corrected tracking) and absolute scores are
 not comparable; the comparison BETWEEN versions is what this is for. Nothing here is used to set a
-value: v9 and v12 are run exactly as they are.
+value: v1 and v2 are run exactly as they are.
 
 Labels from events (in time order):
   restart (SET PIECE, or a goal-kick pass) -> live, team = its team
@@ -171,22 +171,22 @@ def main():
     print("event labels on graded frames: H {:.1%}  A {:.1%}  D {:.1%};  ball visible {:.1%}".format(
         np.mean(gt[graded] == HOME), np.mean(gt[graded] == AWAY), np.mean(gt[graded] == DEAD), np.mean(vis[graded])))
 
-    v9_flags = {"USE_GK_FIX": False, "USE_OOB_GAP": False, "USE_TOUCH_GATE": False}
-    v12_flags = {"USE_GK_FIX": True, "USE_OOB_GAP": True, "USE_TOUCH_GATE": True}
+    v1_flags = {"USE_GK_FIX": False, "USE_OOB_GAP": False, "USE_TOUCH_GATE": False}
+    v2_flags = {"USE_GK_FIX": True, "USE_OOB_GAP": True, "USE_TOUCH_GATE": True}
     gt_codes = to_codes(gt)
     preds = {}
-    for name, flags in (("v9", v9_flags), ("v12", v12_flags)):
+    for name, flags in (("v1", v1_flags), ("v2", v2_flags)):
         labels, f = run(arrays, length, width, halves, flags)
         preds[name] = to_codes(labels)
         summary(name, gt_codes, preds[name], int(graded.sum()))
-    print("  v12 extras: goalkeeper slots {}, slot-frames reassigned {}, extra out-of-play events {}".format(
+    print("  v2 extras: goalkeeper slots {}, slot-frames reassigned {}, extra out-of-play events {}".format(
         len(f["gk"]["gk_slots"]), f["gk"]["reassigned_frames"], f.get("oob_gap_events", 0)))
 
     runs = pm.valid_runs(gt_codes)
-    fa, n_gt, npa = spell_flags(gt_codes, preds["v9"], runs)
-    fb, _, npb = spell_flags(gt_codes, preds["v12"], runs)
-    codes_seg, ca = segment_contrib(gt_codes, preds["v9"], runs)
-    _, cb = segment_contrib(gt_codes, preds["v12"], runs)
+    fa, n_gt, npa = spell_flags(gt_codes, preds["v1"], runs)
+    fb, _, npb = spell_flags(gt_codes, preds["v2"], runs)
+    codes_seg, ca = segment_contrib(gt_codes, preds["v1"], runs)
+    _, cb = segment_contrib(gt_codes, preds["v2"], runs)
     rng = np.random.RandomState(2027)
     d_spell, d_macro = [], []
     for _ in range(2000):
@@ -196,7 +196,7 @@ def main():
         d_macro.append(macro_score(codes_seg, cb, q) - macro_score(codes_seg, ca, q))
     for name, d in (("spellF1", np.array(d_spell)), ("macroF1", np.array(d_macro))):
         lo, hi = np.percentile(d, [5, 95])
-        print("  paired bootstrap {} v12 - v9: 5-95% {:+.4f} .. {:+.4f}   P(diff <= 0) = {:.1%}  ({} possessions)".format(
+        print("  paired bootstrap {} v2 - v1: 5-95% {:+.4f} .. {:+.4f}   P(diff <= 0) = {:.1%}  ({} possessions)".format(
             name, lo, hi, np.mean(d <= 0), n_gt))
     return 0
 

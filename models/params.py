@@ -18,11 +18,11 @@ ACTIVITY_SPAN = 5          # frames each side -> 10-frame (0.4 s) displacement
 MAX_PLAYER_SPEED = 12.0    # m/s; a top sprint is ~10 m/s
 ACTIVITY_SMOOTH = FPS      # +/- 1 s
 
-# -- kicks (v5, from the literature) -------------------------------------------------------------
+# -- kicks (from the literature) -----------------------------------------------------------------
 # Link & Hoernig (2017): a kick is a local maximum of the SMOOTHED ball acceleration of at least
 # 4 m/s^2, credited to the nearest player within reach. Smoothing as in Vidal-Codina et al. (2022):
 # Savitzky-Golay, 2nd order, 7 frames at 25 Hz; the derivatives come straight from the filter.
-# This replaces the v1-v4 impulse test (3 m/s within 0.12 s, i.e. ~25 m/s^2), which diagnose.py
+# This replaces the earlier impulse test (3 m/s within 0.12 s, i.e. ~25 m/s^2), which diagnose.py
 # showed almost never fires on the smooth ATD ball.
 SG_WINDOW = 7              # frames
 KICK_ACCEL = 4.0           # m/s^2
@@ -30,11 +30,11 @@ KICK_ACCEL = 4.0           # m/s^2
 # within 1 m of him (Tracab and Hawk-Eye; 0.5 m for a third provider); when players of BOTH teams
 # are within 1 m of the ball it is a duel, which overrides possession. The challenge rules agree:
 # a contested ball stays with the last team, so a duel gives no evidence and credits no kick.
-R_POSSESSION = 1.0         # m  (v5 value; v6 uses it as the floor of the calibrated radius)
-R_DUEL = 1.0               # m  (v5 value; v6 uses the calibrated possession radius)
+R_POSSESSION = 1.0         # m  (floor of the calibrated radius)
+R_DUEL = 1.0               # m  (uses the calibrated possession radius)
 
-# -- per-provider calibration (v6) ---------------------------------------------------------------
-# v5 showed the literature VALUES do not transfer to our automatic ATD: the median smoothed ball
+# -- per-provider calibration --------------------------------------------------------------------
+# The literature VALUES do not transfer to our automatic ATD: the median smoothed ball
 # acceleration is already 5.7 m/s^2 (above the 4 m/s^2 kick threshold set on cleaned TRACAB data),
 # and the ball is within 1 m of a player on only 28.5% of visible frames. Vidal-Codina et al. (2022)
 # use a different possession radius per tracking provider and recommend tuning per provider. We
@@ -44,32 +44,30 @@ R_DUEL = 1.0               # m  (v5 value; v6 uses the calibrated possession rad
 # Possession zone: it must contain the ball on most frames where a player plainly has it. Sample:
 # ball visible, slow (a ball at a player's feet, not travelling), players active (live play, not
 # a placed ball at a stoppage). Radius = the CAL_ZONE_PCT percentile of the nearest-player distance
-# in that sample, never below the literature 1 m and never above CAL_ZONE_MAX.
+# in that sample, never below the literature 1 m.
 CAL_SLOW_BALL = 2.0        # m/s; a dribbled or received ball, not a pass
 CAL_ZONE_PCT = 75          # % of those frames the zone must cover
-# v7: the upper limit is no longer a fixed 2.5 m (v6: the percentile was above it, so our own cap
-# decided the radius). The zone may not reach past the median distance from the ball to the
-# SECOND-nearest player in the same sample; beyond that it no longer singles out one player.
-# v7: calibration uses graded frames only (pre-match and halftime are not play; v6 took the kick
-# threshold over all frames: 26.3 m/s^2, against 18.1 over graded frames).
+# The upper limit is capped by the median distance from the ball to the SECOND-nearest player in
+# the same sample; beyond that it no longer singles out one player.
+# Calibration uses graded frames only (pre-match and halftime are not play).
 # Duel zone = the calibrated possession zone (Vidal-Codina et al.: duel radius >= possession radius).
 # Kick: a kick must stand out of this provider's acceleration noise, as 4 m/s^2 did for TRACAB.
 # Threshold = the CAL_KICK_PCT percentile of the smoothed acceleration over ball-visible frames,
 # never below the literature 4 m/s^2.
 CAL_KICK_PCT = 90
 
-# -- touches (v1-v3 only; kept for assign_events and diagnose.py) --------------------------------
+# -- touches (kept for assign_events and diagnose.py) --------------------------------------------
 # A touch is a sudden change of ball velocity with a player close to it. A pass or a deflection
 # changes the velocity by several m/s; tracking noise on the computed speed is well under 1 m/s.
 IMPULSE = 3.0              # m/s change of ball velocity
-# v2: 2.0 m (was 1.5). A tracked player is the centre of the body; a stretched leg plus the 2-D
-# projection error of a ball off the ground put the ball up to ~2 m from it at the touch.
+# A tracked player is the centre of the body; a stretched leg plus the 2-D projection error of a
+# ball off the ground put the ball up to ~2 m from it at the touch.
 R_TOUCH = 2.0              # m from the ball
 # Dribbling: a slow ball staying close to one player is controlled by him even without an impulse.
 R_CONTROL = 1.0            # m
 CONTROL_SPEED = 4.0        # m/s; faster than a jog-dribble means the ball is travelling
-# v2: 0.6 s and a clear 1 m lead (was 0.2 s / 0.4 m). A defender standing next to a slow ball for a
-# moment is not dribbling it; a player in control keeps it close over several touches.
+# A defender standing next to a slow ball for a moment is not dribbling it; a player in control
+# keeps it close over several touches.
 CONTROL_MIN = 15           # frames (0.6 s) of continuous control
 CONTROL_MARGIN = 1.0       # m closer than the nearest opponent
 # If both teams are about equally close, the ball is contested: the rules say possession stays with
@@ -78,25 +76,23 @@ MARGIN = 0.4               # m
 
 # -- dead ball -----------------------------------------------------------------------------------
 # explore.py: median mean-player speed is ~2 m/s with the ball in view and ~1 m/s while it is lost
-# (mostly stoppages). Walking pace is ~1.2 m/s.
-# v2: 1.4 m/s (was 1.2), the usual human walking speed. In a stoppage (foul, injury) players walk.
+# (mostly stoppages). Walking pace is ~1.2-1.4 m/s. In a stoppage (foul, injury) players walk.
 SLOW_PLAYERS = 1.4         # m/s, smoothed mean player speed
-# v2: the ball does not have to be still in a stoppage (it is carried, rolled to the taker). What
-# a stoppage never has is a pass: no ball faster than a short pass within +/- 1 s.
+# The ball does not have to be still in a stoppage (it is carried, rolled to the taker). What a
+# stoppage never has is a pass: no ball faster than a short pass within +/- 1 s.
 PASS_SPEED = 6.0           # m/s; a short pass travels at 6-10 m/s
-# v3: a pass (or a restart kick) is fast for a SUSTAINED stretch, not one frame: a ball kicked
-# 6-10 m/s keeps that speed for well over 0.2 s. Single-frame spikes are tracking noise; v2 used a
-# plain max and every spike broke a stoppage or faked a restart.
+# A pass (or a restart kick) is fast for a SUSTAINED stretch, not one frame: a ball kicked 6-10 m/s
+# keeps that speed for well over 0.2 s. Single-frame spikes are tracking noise.
 FAST_MIN = 5               # frames (0.2 s)
 QUIET_WINDOW = FPS         # +/- 1 s
-# v3: a 5 s walk without a pass is a stoppage only where Smart Tagging does NOT describe a phase of
+# A 5 s walk without a pass is a stoppage only where Smart Tagging does NOT describe a phase of
 # play (explore2: lost-ball stretches covered by phase tags are mostly live play).
 LIVE_TAG_MAX = 0.5         # share of the stretch covered by phase-of-play tags
-# v9: windowed stoppage. Within +/- 2 s, at least 2/3 of the frames quiet (and players slow now)
+# v1: windowed stoppage. Within +/- 2 s, at least 2/3 of the frames quiet (and players slow now)
 # also counts as quiet, so one interruption cannot split a stoppage below STOP_MIN.
 QUIET_FRAC_WINDOW = 2 * FPS
 QUIET_FRAC = 2 / 3
-# v9: loose ball (idea from a teammate's model, values ours): slow ball (< CAL_SLOW_BALL) with
+# v1: loose ball (idea from a teammate's model, values ours): slow ball (< CAL_SLOW_BALL) with
 # nobody within LOOSE_ZONES x the calibrated possession zone for LOOSE_MIN -> dead until restart.
 LOOSE_ZONES = 2.0          # two possession zones (~5 m with the 2.54 m zone)
 LOOSE_MIN = 2 * FPS        # 2 s; a sprinter covers ~14 m in that time
@@ -109,9 +105,7 @@ CLOSE_HOLES = FPS          # holes <= 1 s inside a quiet stretch are closed
 # Ball out of play: explore.py found 81 out-of-bounds runs, median 21 frames.
 OOB_MARGIN = 0.3           # m beyond the line, to stay clear of noise at the line
 OOB_MIN = 3                # frames
-# v2: a restart is a KICK OR THROW OF A BALL THAT WAS STILL (or held, i.e. lost by the tracker).
-# v1 took any ball moving at 3 m/s back inside the pitch, which fired while the ball was being
-# carried back for a goal kick.
+# A restart is a KICK OR THROW OF A BALL THAT WAS STILL (or held, i.e. lost by the tracker).
 RESTART_SPEED = 5.0        # m/s
 RESTART_STILL = 1.5        # m/s; the ball before the restart is placed or held ...
 RESTART_STILL_SPAN = FPS // 2  # ... for at least 0.5 s
@@ -125,17 +119,13 @@ MIN_DEAD = FPS             # a dead stretch under 1 s is noise
 MERGE_DEAD = 2 * FPS       # two dead stretches less than 2 s apart are one stoppage
 
 # -- possession ----------------------------------------------------------------------------------
-# v4: team in live play is the most likely H/A sequence of a two-state hidden Markov model,
+# Team in live play is the most likely H/A sequence of a two-state hidden Markov model,
 # decoded with Viterbi, instead of switching on single touch events.
-# Why: diagnose.py showed the velocity-change ("impulse") touch detector almost never fires at a
-# real change: the ATD ball path is smooth (explore2: speed over 1 frame and over 5 frames have the
-# same distribution), so a touch bends the path over many frames instead of in one.
 # Evidence per frame (log-likelihood ratio, + = home):
-#   v5: EVIDENCE_CAP for the team whose player has the ball in his possession zone (1 m, see above),
-#   zero in a duel or when nobody is within 1 m (ball in flight). v4 used a 2 m radius and a graded
-#   distance lead, two values without a source; the literature zone replaces both.
+#   EVIDENCE_CAP for the team whose player has the ball in his possession zone,
+#   zero in a duel or when nobody is within reach (ball in flight).
 EVIDENCE_CAP = 0.5         # per frame; one frame can never decide alone (assumption, no source)
-# v13 (not adopted): calibrate_external.py picks 1.0 on Metrica Sample Game 3 (spellF1 0.503 ->
+# External calibration (calibrate_external.py) picks 1.0 on Metrica Sample Game 3 (spellF1 0.503 ->
 #   0.557 there). On this match it over-switches: 409 possessions, mean 8.8 s / median 5.2 s over
 #   the full match (implausibly short for a possession side), and the public-window guardrail
 #   falls (spellF1 -0.11, paired 5-95% -0.16..-0.06). Metrica has the ball tracked throughout;
@@ -144,22 +134,19 @@ EVIDENCE_CAP = 0.5         # per frame; one frame can never decide alone (assump
 TAG_EVIDENCE = 0.05        # per frame while the ball is lost and a reliable tag names a team
 # Cost of a team change = log of the expected frames between changes; a constant cost per frame
 # is the geometric possession length that Markov models of possession fit (Lopez Pena 2014).
-# v5: mean possession 12 s (was 15 s, no source). FIFA U-20 World Cup 2025 reports possession
-# sequences of 8.8 s on average and 12.0 s for Spain, the most possession-oriented sides being
-# 11.8-12.5 s. This is a Spanish top-flight match with a possession-oriented home side.
+# Mean possession 12 s: FIFA U-20 World Cup 2025 reports possession sequences of 8.8 s on average
+# and 12.0 s for Spain, the most possession-oriented sides being 11.8-12.5 s.
 # 12 s = 300 frames -> ln(300) = 5.70. A clear zone lead needs ~0.5 s of play to pay for a change.
 MEAN_POSSESSION_S = 12.0
 SWITCH_COST = 5.70         # = ln(MEAN_POSSESSION_S * FPS)
 # A kick by one team, not in a duel, is one contact, and one contact starts a team possession
 # (Link & Hoernig 2017; also the public ground truth's own definition).
-# v7: a detected kick is evidence, not certainty. In an HMM the evidence of a detector is the log
+# A detected kick is evidence, not certainty. In an HMM the evidence of a detector is the log
 # of its odds of being right: ln(precision / (1 - precision)). Link & Hoernig (2017, Table 1)
-# report kick-detection precision .86 on cleaned TRACAB data, so ln(.86 / .14) = 1.82. Our data is
-# noisier, so this is an upper bound. v5/v6 gave a kick the whole SWITCH_COST, i.e. treated every
-# detected kick as certain; now a kick needs ~0.3 s of zone evidence to change the team.
+# report kick-detection precision .86 on cleaned TRACAB data, so ln(.86 / .14) = 1.82.
 KICK_PRECISION = 0.86
 KICK_EVIDENCE = 1.82       # = ln(KICK_PRECISION / (1 - KICK_PRECISION))
-# v8: team shape while the ball is lost (models/shape.py). Stretch index difference, smoothed
+# Team shape while the ball is lost (models/shape.py). Stretch index difference, smoothed
 # +/- 1 s; logistic fit on first-pass pseudo-labels from frames at least 2 s away from any change;
 # per-frame evidence divided by the feature's correlation time (capped at 10 s).
 USE_SHAPE = True
@@ -167,10 +154,10 @@ SHAPE_SMOOTH = FPS         # +/- 1 s
 SHAPE_MARGIN = 2 * FPS     # training frames must be this far from a change of label
 SHAPE_MIN_TRAIN = 5000     # frames (200 s); fewer -> no shape model
 SHAPE_TAU_MAX = 10 * FPS
-# -- v12: ideas from a teammate's model (branch rey, v14), values ours -------------------------
-# Fixed BEFORE looking at any score (2026-11-17). The teammate's values were chosen by grid search
-# on the public window, so only the ideas are taken; every value below comes from the Laws of the
-# Game, from the data's own distribution, or is a stated assumption.
+# -- v2: ideas from a teammate's model, values ours --------------------------------------------
+# The teammate's values were chosen by grid search on the public window, so only the ideas are
+# taken; every value below comes from the Laws of the Game, from the data's own distribution, or
+# is a stated assumption.
 #
 # (1) Goalkeeper identity. A track slot whose median distance to the halfway line exceeds half the
 #     pitch minus the penalty-area depth (16.5 m, Laws of the Game) lives in a penalty area: a
@@ -195,11 +182,9 @@ USE_OOB_GAP = True
 USE_TOUCH_GATE = True
 TOUCH_SHARE = 0.9
 
-# v10: H / A / D in one three-state HMM (models/joint.py). The dead-ball evidence model is fitted
-# on first-pass pseudo-labels; transition costs come from first-pass stretch lengths. The hard
-# dead-ball rules of v1-v9 (99% precise on the public window) stay as strong evidence: +1 per
-# frame, so a 1 s hard stretch already outweighs any transition cost.
-USE_JOINT = False          # v10 result: not adopted (see joint.py and the v10 commit)
+# H / A / D in one three-state HMM (models/joint.py). The dead-ball evidence model is fitted
+# on first-pass pseudo-labels; transition costs come from first-pass stretch lengths.
+USE_JOINT = False          # not adopted (see models/joint.py)
 HARD_DEAD_EVIDENCE = 1.0
 START_PRIOR = 20.0         # the restart team is near certain at the first frame of live play
 START_LOOKAHEAD = 5 * FPS  # after a restart, the first kick within 5 s names the team
@@ -218,17 +203,16 @@ TAG_WEIGHTS = {
 }
 TAG_MARGIN = 0.5           # weighted vote lead needed to name a team
 
-# -- v14: referee whistle from the tactical sound track (whistle.py) --------------------------
+# -- v3: referee whistle from the tactical sound track (features/whistle.py) --------------------
 # Pitch chosen by rule from the sound: 3.6-3.9 kHz (that bin is 8.5x over-represented among the
 # 1% most tonal frames; a steady 2.3-2.5 kHz background tone and crowd song at 2.7-3.3 kHz are not).
-# WHISTLE_K was set before the run; it gives 129 whistles, 1.22 per minute, median 0.28 s, inside
-# the plausible 1-2.5 per minute and 0.2-1 s. Unlabelled: half fall on our v12 dead ball.
+# WHISTLE_K gives 129 whistles, 1.22 per minute, median 0.28 s, inside the plausible 1-2.5 per
+# minute and 0.2-1 s. Unlabelled: half fall on our v2 dead ball.
 USE_WHISTLE = True
 WHISTLE_LEAD = 3 * FPS     # a whistle up to 3 s before players slow down starts that stoppage
 WHISTLE_K = 6.0            # robust sd above the match median tonality (rare, loud tone)
 WHISTLE_MIN_S = 0.15       # shortest whistle; a short foul blast is ~0.2-0.3 s
 WHISTLE_GAP = 2            # frames of dip inside one whistle that are closed
 WHISTLE_HALF_BAND = 1      # 100 Hz bins either side of the chosen pitch (a whistle wavers ~+/-100 Hz)
-WHISTLE_PICK_TOP = 0.01    # share of most tonal frames the pitch is picked from. 0.1% gave the
-                           #   whistle bins ~13 frames each, under PICK_MIN, so a background bin won
+WHISTLE_PICK_TOP = 0.01    # share of most tonal frames the pitch is picked from
 WHISTLE_PICK_MIN = 20      # frames a bin needs among the top frames to be a pitch candidate

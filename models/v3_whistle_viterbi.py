@@ -1,7 +1,7 @@
-"""Model v14 (our submission): touch-gated Viterbi + referee whistle. The one command a reviewer runs.
+"""Model v3 (our submission): touch-gated Viterbi + referee whistle.
 
-    .\\.venv\\Scripts\\python.exe models\\v14_whistle_viterbi.py                 # -> evaluation/results/v14.csv
-    .\\.venv\\Scripts\\python.exe models\\v14_whistle_viterbi.py --name team     # -> evaluation/results/team.csv
+    .\\.venv\\Scripts\\python.exe models\\v3_whistle_viterbi.py                  # -> evaluation/results/v3.csv
+    .\\.venv\\Scripts\\python.exe models\\v3_whistle_viterbi.py --name team      # -> evaluation/results/team.csv
 
 Pipeline: tracking + Smart Tagging + referee whistle (tactical sound) -> features -> dead ball ->
 possession -> CSV. The first run decodes the sound once (a few minutes) and caches it in data/cache.
@@ -75,17 +75,17 @@ def summary(labels, f, halves):
     print("  calibrated: kick threshold {:.1f} m/s^2 (p{} over graded frames), kick evidence {:.2f}".format(
         c["kick_accel"], P.CAL_KICK_PCT, P.KICK_EVIDENCE))
     g = f.get("gk", {})
-    print("  v12 goalkeeper fix: {} goalkeeper slots, {} slot-frames credited to the other team".format(
+    print("  v2 goalkeeper fix: {} goalkeeper slots, {} slot-frames credited to the other team".format(
         len(g.get("gk_slots", [])), g.get("reassigned_frames", 0)))
-    print("  v12 ball out while lost: {} extra out-of-play events".format(f.get("oob_gap_events", 0)))
-    print("  v14 whistle: {} stoppages with a whistle ({} new, supported by nothing else), "
+    print("  v2 ball out while lost: {} extra out-of-play events".format(f.get("oob_gap_events", 0)))
+    print("  v3 whistle: {} stoppages with a whistle ({} new, supported by nothing else), "
           "{:.1f} s moved back to the whistle".format(f.get("whistle_stops", 0), f.get("whistle_new", 0),
                                                       f.get("whistle_backfill", 0) / P.FPS))
     tg = f.get("touch_gate")
     if tg is None:
-        print("  v12 touch gate: not used")
+        print("  v2 touch gate: not used")
     else:
-        print("  v12 touch gate: live frames touch {:.1%} / ball away {:.1%} / lost {:.1%} -> change cost "
+        print("  v2 touch gate: live frames touch {:.1%} / ball away {:.1%} / lost {:.1%} -> change cost "
               "{:.2f} / {:.2f} / {:.2f}".format(tg["f_touch"], tg["f_away"], tg["f_lost"],
                                                tg["cost_touch"], tg["cost_away"], tg["cost_lost"]))
     m = f.get("shape_model")
@@ -124,7 +124,7 @@ def summary(labels, f, halves):
         *np.nanpercentile(act[~vis], [25, 50, 75])))
 
 
-def main(default_name="v14"):
+def main(default_name="v3"):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--name", default=default_name, help="file name on the board (no .csv)")
     parser.add_argument("--out", default=os.path.join(ROOT, "evaluation", "results"))
@@ -141,7 +141,7 @@ def main(default_name="v14"):
         for _, first, last in halves:
             graded[first:last + 1] = True
         whistle, winfo = wmod.load(n, graded)
-        print("v14 whistle: pitch {:.0f}-{:.0f} Hz, threshold {:.1f} dB, {} whistles in graded time".format(
+        print("v3 whistle: pitch {:.0f}-{:.0f} Hz, threshold {:.1f} dB, {} whistles in graded time".format(
             winfo["pitch_lo"], winfo["pitch_hi"], winfo["threshold"], winfo["n"]))
     labels, f = predict(arrays, tagging.build(n), halves, whistle)
 

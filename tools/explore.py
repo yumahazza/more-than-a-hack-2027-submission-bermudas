@@ -1,13 +1,10 @@
-"""Stage 1.3: summary statistics of the match data, to understand it before building a solution.
+"""Summary statistics of the match data, to understand it before building a solution.
 
     .\\.venv\\Scripts\\python.exe tools\\explore.py
 
-Prints SUMMARY NUMBERS only (shares, percentiles, counts) over the graded frames. Nothing is
-printed per frame, so the output can be shared with the team (and with an AI assistant) without
-leaking the data.
-
-The public ground truth is deliberately NOT used: statistics per ground-truth class would invite
-picking thresholds from those 5 minutes, which RULES.md forbids.
+Prints SUMMARY NUMBERS only (shares, percentiles, counts) over the graded frames, never per-frame
+output. The public ground truth is deliberately NOT used: statistics per ground-truth class would
+invite picking thresholds from those 5 minutes, which RULES.md forbids.
 """
 
 import os
@@ -238,8 +235,6 @@ def main():
     for kind in sorted(rows, key=lambda k: -rows[k][0]):
         k, o, g, sl = rows[kind]
         print("  {:<24} {:>4} {:>10} {:>16} {:>18}".format(kind, k, o, g, sl))
-
-    print("\ndone. Every number above is a summary; safe to share with the team.")
 
 
 if __name__ == "__main__":

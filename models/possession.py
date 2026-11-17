@@ -1,20 +1,17 @@
 """Which team has the ball while it is alive.
 
-v4: inside every stretch of live play, the team is the most likely H/A sequence of a two-state
+Inside every stretch of live play, the team is the most likely H/A sequence of a two-state
 hidden Markov model, decoded with Viterbi.
 
-  evidence per frame  v5: the ball in one team's 1 m possession zone (no evidence in a duel),
-                      a kick credited to a team (worth one change on its own), or a reliable Smart
-                      Tagging team while the ball is lost (see docs/REFERENCES.md)
+  evidence per frame  the ball in one team's possession zone (no evidence in a duel),
+                      a kick credited to a team, or a reliable Smart Tagging team while the ball
+                      is lost (see docs/REFERENCES.md)
   change cost         SWITCH_COST, the log of the expected frames between possession changes
 
 A change happens only where the evidence for the other team, summed over the following frames,
 outweighs the cost. A defender briefly next to the ball does not pay it; an interception followed
 by half a second of play does. Nearest-player flips ~29 times a minute; real possession changes
 ~3 times.
-
-The touch detector of v1-v3 (touch_frames, episodes) is kept: it still names the team at a restart
-and diagnose.py reports on it.
 """
 
 import numpy as np
@@ -95,9 +92,9 @@ def absorb_short(labels, min_len, lo, hi):
 
 
 def evidence(f, tags):
-    """Per-frame log-likelihood ratio, positive = home has the ball (v5).
+    """Per-frame log-likelihood ratio, positive = home has the ball.
 
-    - ball in one team's possession zone (1 m), not a duel: +/- EVIDENCE_CAP
+    - ball in one team's possession zone, not a duel: +/- EVIDENCE_CAP
     - a kick credited to a team (not in a duel): +/- KICK_EVIDENCE on that frame
     - ball lost and a reliable Smart Tagging team: +/- TAG_EVIDENCE
     - anything else (ball in flight, duel, no information): 0
@@ -116,7 +113,7 @@ def evidence(f, tags):
 
 
 def touch_costs(f, dead, halves):
-    """v12: per-frame cost of a team change (see params.USE_TOUCH_GATE). Returns (costs, info)."""
+    """v2: per-frame cost of a team change (see params.USE_TOUCH_GATE). Returns (costs, info)."""
     n = f["n"]
     costs = np.full(n, P.SWITCH_COST)
     if not P.USE_TOUCH_GATE:
@@ -144,7 +141,7 @@ def touch_costs(f, dead, halves):
 
 def viterbi(llr, start, cost=None):
     """Most likely H/A path for one live stretch, starting (almost surely) with `start`.
-    `cost` = per-frame team-change cost (v12); None = SWITCH_COST everywhere."""
+    `cost` = per-frame team-change cost (v2); None = SWITCH_COST everywhere."""
     n = len(llr)
     if cost is None:
         cost = np.full(n, P.SWITCH_COST)
@@ -172,10 +169,10 @@ def viterbi(llr, start, cost=None):
 
 
 def assign(f, dead, tags, halves):
-    """Label codes per frame: 0 H, 1 A, 2 D, -1 outside the halves (v4/v5, Viterbi)."""
+    """Label codes per frame: 0 H, 1 A, 2 D, -1 outside the halves (Viterbi)."""
     n = f["n"]
     labels = np.full(n, NONE, dtype=np.int8)
-    # v5: the restart team is named by the first KICK after the restart (the restart kick itself)
+    # The restart team is named by the first KICK after the restart (the restart kick itself)
     kick_at = np.flatnonzero(f["kick_team"] != NONE)
     ep_starts = kick_at.astype(np.int64)
     ep_teams = f["kick_team"][kick_at].astype(np.int8)
@@ -200,7 +197,7 @@ def assign(f, dead, tags, halves):
     f["shape_model"] = None
     llr_ha = llr
     if P.USE_SHAPE:
-        # v8: second pass with team-shape evidence on lost-ball live frames (see shape.py)
+        # Second pass with team-shape evidence on lost-ball live frames (see shape.py)
         import shape
         model = shape.fit(f, labels, dead)
         f["shape_model"] = model
@@ -210,7 +207,7 @@ def assign(f, dead, tags, halves):
             llr_ha = llr + shape.evidence(f, model, ~f["vis"])
     f["joint_model"] = None
     if P.USE_JOINT:
-        # v10: H / A / D decided together (see joint.py); the labels above are its first pass
+        # H / A / D decided together (see joint.py); the labels above are its first pass
         import joint
         joint_labels, info = joint.decode(f, tags, halves, labels, dead, llr_ha)
         f["joint_model"] = info
@@ -234,8 +231,7 @@ def drop_short_dead(labels, min_len, lo, hi):
 
 
 def assign_events(f, dead, tags, halves):
-    """v1-v3 assignment (switch on touch events), kept for comparison."""
-    """Label codes per frame: 0 H, 1 A, 2 D, -1 outside the halves."""
+    """Event-based assignment (switch on touch events), kept for comparison."""
     n = f["n"]
     labels = np.full(n, NONE, dtype=np.int8)
     eps = episodes(touch_frames(f))

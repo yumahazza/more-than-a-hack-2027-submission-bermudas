@@ -1,4 +1,4 @@
-"""v8: team shape as possession evidence while the ball is lost.
+"""Team shape as possession evidence while the ball is lost.
 
 The ball is missing on 41% of graded frames, and inside live play the model had almost nothing to
 go on there (only Smart Tagging, at a small weight). Two lines of work say the players' movement

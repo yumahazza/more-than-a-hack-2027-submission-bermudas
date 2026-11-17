@@ -12,15 +12,11 @@ Method, no frame-specific rule (RULES.md #1) and no hand label:
      (same duration), so 40 ms audio block k = video frame k.
   2. Per 40 ms block, a 64 ms Hann-windowed spectrum. For every 100 Hz bin of 2-4.5 kHz: its
      strongest line over the median of the whole band, in dB ("how much one tone stands out").
-  3. v1 took the strongest line anywhere in 2-4.5 kHz and found 9 whistles in 106 minutes. The
-     aggregate view (whistle_diag.py) showed why: the peak usually sits at 2.0-2.5 kHz on EVERY
-     frame (a steady background tone and low-frequency spill), which hides the whistle.
-  4. v2: the referee uses one whistle all match, so its pitch is the 100 Hz bin most
+  3. The referee uses one whistle all match, so its pitch is the 100 Hz bin most
      over-represented among the most tonal frames (share in the top WHISTLE_PICK_TOP over share on
-     all frames).
-     It is chosen by this rule from the sound itself, then detection uses only that bin and its
-     neighbours (+/- WHISTLE_HALF_BAND).
-  5. Threshold = median + WHISTLE_K robust sd of that narrow-band tonality over the graded frames.
+     all frames). It is chosen by this rule from the sound itself, then detection uses only that
+     bin and its neighbours (+/- WHISTLE_HALF_BAND).
+  4. Threshold = median + WHISTLE_K robust sd of that narrow-band tonality over the graded frames.
      A whistle = a run above it lasting WHISTLE_MIN_S or more, short dips closed.
 
 Output: data/cache/BAR-ATH_whistle.npz (per-frame spectrum summary and whistle flag), and only
@@ -199,12 +195,12 @@ def main():
         print("  duration s: p10 {:.2f}  p50 {:.2f}  p90 {:.2f}".format(*np.percentile(dur, [10, 50, 90])))
     print("  (plausibility: a referee blows roughly 1-2.5 times a minute of play, mostly 0.2-1 s)")
 
-    sub = os.path.join(ROOT, "evaluation", "results", "v12.csv")
+    sub = os.path.join(ROOT, "evaluation", "results", "v2.csv")
     if os.path.exists(sub) and len(starts):
         lab = np.loadtxt(sub, delimiter=",", skiprows=1, dtype=str, usecols=1)
         at = lab[starts]
         soon = np.array([np.any(lab[s:min(s + 5 * P.FPS, n)] == "D") for s in starts])
-        print("\nagainst our own v12 labels (no ground truth):")
+        print("\nagainst our own v2 labels (no ground truth):")
         print("  whistle starts on D {:.0%}; on live {:.0%}, of which D follows within 5 s {:.0%}".format(
             np.mean(at == "D"), np.mean(at != "D"), np.mean(soon[at != "D"]) if np.any(at != "D") else 0))
         print("  whistles in live play with no D within 5 s (candidate untagged stoppages): {}".format(

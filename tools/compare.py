@@ -1,6 +1,6 @@
 """Paired bootstrap: is submission B better than submission A on the public window, beyond noise?
 
-    .\\.venv\\Scripts\\python.exe tools\\compare.py v9 v12
+    .\\.venv\\Scripts\\python.exe tools\\compare.py v1 v2
 
 run_evaluation.py --bootstrap gives one interval per submission. Two intervals that overlap do not
 mean the DIFFERENCE is noise: both submissions are scored on the same 17 possessions, so their

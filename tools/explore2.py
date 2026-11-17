@@ -1,4 +1,4 @@
-"""Stage 1.3 (continued): two questions raised by explore.py.
+"""Two questions raised by explore.py.
 
     .\\.venv\\Scripts\\python.exe tools\\explore2.py
 
@@ -190,8 +190,6 @@ def main():
     print("  within 2 m of a line / outside: {}   near the centre spot (kick-off): {}".format(
         pct(np.nanmean(reap_line < 2)), pct(np.mean(reap_centre))))
     print("  does not reappear within 10 s: {}".format(pct(np.mean(np.isnan(reap_line)))))
-
-    print("\ndone. Every number above is a summary; safe to share with the team.")
 
 
 if __name__ == "__main__":

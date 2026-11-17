@@ -26,7 +26,7 @@ import params as P  # noqa: E402
 import tags as tagging  # noqa: E402
 from atd import load_arrays  # noqa: E402
 from deadball import close_holes, rolling_max, runs, sustained  # noqa: E402
-from v14_whistle_viterbi import predict  # noqa: E402
+from v3_whistle_viterbi import predict  # noqa: E402
 
 GT_PATH = os.path.join(ROOT, "evaluation", "gt", "BAR-ATH_possession_gt_public.csv")
 CODE = {"H": 0, "A": 1, "D": 2, "X": -1}

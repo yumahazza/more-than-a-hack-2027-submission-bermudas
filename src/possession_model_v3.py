@@ -1,18 +1,4 @@
-"""Possession Decoder v3: Ballistic-Aware Physics + Stoppage Inertia Compensation + Asymmetric Viterbi.
-
-Implements the 5 rules-compliant v3 architectural upgrades over v2 without overfitting the 5-minute public slice:
-1. Active In-Field Open-Play Ball Protection & Ballistic Fly-By Filtering (Newton's 1st Law:
-   a ball moving > 8.2 m/s without a kick/touch impulse >= 12 m/s^2 is in ballistic flight, not controlled).
-2. Minimum Physical Duration for Ungrounded Dead ('D') Islands + Asymmetric Viterbi Dead Entry/Exit Penalties
-   (`heal_short_ungrounded_dead_spells` heals brief open-play D blips <= 70f that lack physical triggers).
-3. Post-OOB Recovery & Goalkeeper Box Physics Lock (suppresses retreating formation sprint scores during
-   post-OOB retrieval while releasing immediately on active wing-restart dribble).
-4. Transition Boundary Sharpening (`mean_abs_latency` & `spellF1@0.6-0.7`) via:
-   - Stoppage-gap player deceleration & restart-burst inertia compensation,
-   - Isolated brief deflection filtering (`<= 18f` sandwiched between same-team anchors),
-   - Local touch-gated Viterbi switching penalty (`switch_team_touch=18.0` vs `switch_team_base=29.0`).
-5. Full-Match Rules-Compliant Discipline (evaluated across all 199,319 frames / 90 minutes).
-"""
+"""Possession decoder v3: ball-flight filtering, stoppage inertia handling, and touch-gated Viterbi."""
 
 import numpy as np
 

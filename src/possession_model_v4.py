@@ -1,41 +1,19 @@
-"""Rule-based + 3-state Viterbi possession model (v4: 5-Pillar Football Physics Architecture).
+"""Rule-based + 3-state Viterbi possession model (v4).
 
-Key physical and tactical upgrades over v3 (`v3_physics_viterbi`):
-1. Pillar 1 — Exact Set-Piece & Stoppage Kick-Release Detector:
-   - Stationary ball waiting for a free-kick/corner/throw-in/goal-kick remains Dead ('D')
-     until the physical kick/throw impulse occurs (`verified_restart_kick`).
-   - Releases live play immediately upon a verified kick impulse in-bounds where collective
-     player speeds (`p80`) accelerate into live play over the next 40 frames (`walk_fut40 <= 0.72`),
-     preventing 22-player `walk_fraction` inertia from delaying restarts while ignoring casual
-     ball tosses during stoppages.
-   - Early wing restart dribble release from `post_oob` once a receiver controls and dribbles
-     the ball inside the pitch with rising collective player speed.
-2. Pillar 2 — Goalkeeper Goal-Side Identity Correction (`upgrade_atd_features_v4`):
-   - Automatically identifies goalkeeper track slots (`median(|x - 0.5|) > 0.35`) and corrects
-     goal-end slot swaps (`x < 0.25` vs `x > 0.75`) relative to each team's defending half,
-     eliminating false opponent turnovers when a goalkeeper holds or distributes the ball inside
-     their own penalty/6-yard box.
-3. Pillar 3 — Sustained Unchased Boundary Stoppage Extrapolation (`unchased_boundary_stop`):
-   - Detects balls rolling into the boundary corridor (`x <= 0.10 | x >= 0.90 | y <= 0.12 | y >= 0.88`)
-     with no player within 6.0 m, receding nearest player (`nd_fut15 - nd >= 1.0 m`), and
-     collapsing collective player speed (`p80 - p80_fut45 >= 0.85 m/s`), sustaining the dead-ball
-     state smoothly until collective stoppage walking takes over.
-4. Pillar 4 — Co-Moving Sprint Dribble Vector & Pass-Flight Lock:
-   - Computes player-ball relative velocity (`rel_spd_home`, `rel_spd_away`) to preserve control
-     anchors during high-speed sprint dribbles (`bspd <= 9.8 m/s` with `rel_spd <= 3.2 m/s`)
-     while rejecting high-speed pass fly-bys (`min(bspd) > 7.2 m/s` and `min(rel_spd) > 3.2 m/s`).
-   - Trims leading pre-reception approach frames on incoming passes (`bspd >= 4.4 m/s`, `accel < 9.5 m/s^2`,
-     `nd > 1.05 m`, `rel_spd > 3.0 m/s`) so turnovers align with actual foot contact.
-   - Blocks same-team pass bridging across gaps where the opposing team executed a strong
-     deflection/interception impulse (`accel >= 18.0 m/s^2`, `abs(margin) >= 2.2 m`).
-5. Pillar 5 — Close-Combat Tackle Detector, Interception Kick & In-Play Occlusion Discipline:
-   - Detects close-combat boot tackles (`nd <= 0.68 m`, `abs(margin) >= 0.30 m`) when the tackling
-     team emerges with sustained spatial margin (`>= 0.85 m`) over the subsequent 25 frames, as well
-     as Newtonian unseen-foot kick impulses when an optical player track is briefly occluded.
-   - Preserves short active interception kicks (`len >= 6`, `accel >= 15.0 m/s^2`, `nd <= 1.0 m`,
-     `abs(margin) >= 1.1 m`) without false hold-until-control bleed.
-   - Requires collective walking (`walk >= 0.68`) before treating a missing-ball occlusion gap
-     (`gap_len >= 75`) as a real stoppage trigger in `heal_short_ungrounded_dead_spells_v4`.
+Upgrades over v3:
+1. Set-piece & stoppage kick-release detection:
+   - Stationary ball waiting for a set piece remains Dead ('D') until the kick/throw impulse occurs.
+   - Early wing restart dribble release from `post_oob` once a receiver controls and dribbles inside the pitch.
+2. Goalkeeper goal-side identity correction (`upgrade_atd_features_v4`):
+   - Identifies goalkeeper track slots (`median(|x - 0.5|) > 0.35`) and assigns goal-end slots
+     relative to each team's defending half.
+3. Boundary stoppage extrapolation (`unchased_boundary_stop`):
+   - Detects slow/unchased balls in the boundary corridor while collective player speed drops.
+4. Player-ball relative velocity & pass-flight filtering:
+   - Uses relative speed (`rel_spd_home`, `rel_spd_away`) to keep control anchors on sprint dribbles
+     while filtering pass fly-bys.
+5. Close-range tackle and interception handling:
+   - Credits close tackles and active interception kicks when followed by sustained spatial margin.
 """
 
 import numpy as np

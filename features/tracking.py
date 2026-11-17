@@ -75,12 +75,10 @@ def kick_frames(acc, vis, near_d, near_team, duel, threshold, reach):
 def calibrate(vis, speed, near_d, second_d, activity_s, acc, graded):
     """Possession radius and kick threshold from this match's own distributions (no labels).
 
-    v6: zone = 75th percentile of the nearest-player distance with a slow ball in live play,
-        kick threshold = 90th percentile of the acceleration.
-    v7: only graded frames (the halves we label; pre-match and halftime frames are not play), and
-        the zone is capped by the data instead of a fixed 2.5 m: it may not reach past the median
-        distance of the SECOND-nearest player in the same sample, or it would stop singling out
-        one player.
+    zone = 75th percentile of the nearest-player distance with a slow ball in live play,
+    kick threshold = 90th percentile of the acceleration over graded frames.
+    The zone is capped by the median distance of the SECOND-nearest player in the same sample,
+    or it would stop singling out one player.
     """
     base = vis & graded
     slow_live = (base & np.isfinite(near_d) & (np.nan_to_num(speed, nan=99) < P.CAL_SLOW_BALL)
@@ -101,7 +99,7 @@ def calibrate(vis, speed, near_d, second_d, activity_s, acc, graded):
 
 
 def gk_team_matrix(px, team, halves, length):
-    """v12: team per frame and slot, with goalkeeper tracks credited to the goal they stand at.
+    """v2: team per frame and slot, with goalkeeper tracks credited to the goal they stand at.
 
     Idea from a teammate's model; the rule here is the Laws of the Game: a slot whose median
     distance to the halfway line exceeds half the pitch minus the penalty-area depth is a
@@ -181,7 +179,7 @@ def compute(arrays, length, width, halves=None):
         dist = np.hypot(px - bx[:, None].astype(np.float32), py - by[:, None].astype(np.float32))
         d_home = np.nanmin(np.where(team_f == HOME, dist, np.nan), axis=1)
         d_away = np.nanmin(np.where(team_f == AWAY, dist, np.nan), axis=1)
-        # v7: distance to the second-nearest player of either team (caps the possession zone)
+        # distance to the second-nearest player of either team (caps the possession zone)
         second_d = np.partition(np.where(np.isfinite(dist), dist, np.inf), 1, axis=1)[:, 1]
         second_d[~np.isfinite(second_d)] = np.nan
 
@@ -196,7 +194,7 @@ def compute(arrays, length, width, halves=None):
         activity = np.nanmean(pspeed, axis=1)
     activity_s = rolling_nanmean(activity, P.ACTIVITY_SMOOTH)
 
-    # v8: team shape (stretch index difference, home - away), see shape.py
+    # team shape (stretch index difference, home - away), see shape.py
     from shape import stretch_index
     shape = rolling_nanmean(stretch_index(px, py, team, HOME) - stretch_index(px, py, team, AWAY),
                             P.SHAPE_SMOOTH)
@@ -207,7 +205,7 @@ def compute(arrays, length, width, halves=None):
     margin[np.isnan(margin)] = np.inf          # one side not tracked near: no contest
     outside = -np.minimum.reduce([bx, length - bx, by, width - by])   # >0 = metres outside
 
-    # v5 structure (Vidal-Codina et al. 2022; Link & Hoernig 2017), v6 values calibrated on this match
+    # structure (Vidal-Codina et al. 2022; Link & Hoernig 2017), values calibrated on this match
     accel = ball_acceleration(bx, by, P.SG_WINDOW, P.FPS)
     calib = calibrate(vis, speed, near_d, second_d, activity_s, accel, graded)
     r_duel = calib["r_duel"]

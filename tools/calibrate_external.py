@@ -36,7 +36,7 @@ GRID = {
     "MEAN_POSSESSION_S": [8.0, 10.0, 12.0, 15.0],
     "TOUCH_SHARE": [0.8, 0.9, 0.95, 0.99],
 }
-V12 = {"USE_GK_FIX": True, "USE_OOB_GAP": True, "USE_TOUCH_GATE": True}
+V2 = {"USE_GK_FIX": True, "USE_OOB_GAP": True, "USE_TOUCH_GATE": True}
 
 
 def main():
@@ -48,7 +48,7 @@ def main():
     n = len(arrays["ball"])
     gt, halves = build_labels(folder, n, team_ids)
     gt_codes = to_codes(gt)
-    for k, v in V12.items():
+    for k, v in V2.items():
         setattr(P, k, v)
     tag_data = tagging.build(n, events=[])
     f = compute(arrays, length, width, halves)
@@ -81,7 +81,7 @@ def main():
     print("\ntruth: {} possessions of mean {:.1f} s".format(
         pm.evaluate(gt_codes, gt_codes, bootstrap_n=0)["n_gt_spells"],
         pm.evaluate(gt_codes, gt_codes, bootstrap_n=0)["gt_mean_spell_duration_s"]))
-    print("current (v12): spellF1 {:.4f} macroF1 {:.4f} poss {} mean {:.1f} s  {}".format(*current))
+    print("current (v2): spellF1 {:.4f} macroF1 {:.4f} poss {} mean {:.1f} s  {}".format(*current))
     print("top 10:")
     for r in rows[:10]:
         print("  spellF1 {:.4f} macroF1 {:.4f} poss {:>4} mean {:>5.1f} s  {}".format(*r))
