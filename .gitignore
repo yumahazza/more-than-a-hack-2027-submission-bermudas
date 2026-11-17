@@ -62,3 +62,7 @@ __pycache__/
 venv/
 env/
 .DS_Store
+
+# -- editor / notebook leftovers ---------------------------------------------------------------
+# Notebook outputs can embed match data (tables, tracking animations); commit notebooks cleared.
+.ipynb_checkpoints/
